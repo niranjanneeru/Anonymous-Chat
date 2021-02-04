@@ -1,16 +1,15 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode, Update
 from telegram.ext import CallbackContext
+
+from data import current_list_users, active_chats, active_commands, delete_msg
+from database.db import Db
+from models.user import User
 from utils import (WELCOME_TEXT, REGISTRATION_CALLBACK_DATA, PRIVATE_POLICY_CALLBACK_DATA,
                    ABOUT_US_CALLBACK_DATA, ASK_FOR_NAME, MALE_CALLBACK_DATA, FEMALE_CALLBACK_DATA,
                    NEUTRAL_CALLBACK_DATA, RESET_CALLBACK_DATA, RANDOM_CHAT_CALLBACK_DATA, COMMAND_CALLBACK_DATA,
-                   ACCEPT_CALLBACK_DATA, INTEREST_LIST, WALKABOUT_CALLBACK_DATA, COMMANDS, ACCEPT_REVEAL_CALLBACK_DATA,
+                   INTEREST_LIST, WALKABOUT_CALLBACK_DATA, COMMANDS, ACCEPT_REVEAL_CALLBACK_DATA,
                    DECLINE_REVEAL_CALLBACK_DATA,
-                   DECLINE_CALLBACK_DATA, CHAT_TEXT, CLOSE_CHAT, REPORT_CHAT, REVEAL_IDENTITY_REQUEST)
-from models.user import User
-from models.request import Request
-from data import current_list_users, active_chats, active_requests, active_commands, delete_msg
-from database.db import Db
-from random import sample
+                   CLOSE_CHAT, REPORT_CHAT, REVEAL_IDENTITY_REQUEST)
 
 
 def welcome(update: Update, context: CallbackContext) -> None:

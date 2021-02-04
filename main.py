@@ -1,9 +1,11 @@
+import os
+
 from telegram.ext import Updater, CommandHandler, PollHandler, PollAnswerHandler, CallbackQueryHandler, MessageHandler, \
     Filters
-from modules.functions import welcome, help_menu
-from modules.handlers import callback_query_handler, message_handler, poll_handler, poll_answer_handler
-import os
+
 import data
+from modules.functions import help_menu
+from modules.handlers import callback_query_handler, message_handler, poll_handler, poll_answer_handler
 
 if __name__ == '__main__':
     updater = Updater('1429135380:AAGeHjnn8aoWK-nr3NZon3UT4RFE12PkhXw', use_context=True)

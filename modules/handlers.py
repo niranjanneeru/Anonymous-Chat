@@ -1,15 +1,15 @@
-from telegram import Update, ParseMode, PollOption
+from telegram import Update, ParseMode
 from telegram.ext import CallbackContext
+
+from data import active_chats
 from utils import (REGISTRATION_CALLBACK_DATA, MALE_CALLBACK_DATA, FEMALE_CALLBACK_DATA,
                    NEUTRAL_CALLBACK_DATA, RANDOM_CHAT_CALLBACK_DATA, RESET_CALLBACK_DATA, COMMAND_CALLBACK_DATA,
                    ABOUT_US_CALLBACK_DATA, PRIVATE_POLICY_CALLBACK_DATA, WALKABOUT_CALLBACK_DATA, ACCEPT_CALLBACK_DATA,
-                   DECLINE_CALLBACK_DATA, CLOSE_CHAT, INTEREST_LIST, REVEAL_IDENTITY_REQUEST,
+                   DECLINE_CALLBACK_DATA, CLOSE_CHAT, REVEAL_IDENTITY_REQUEST,
                    ACCEPT_REVEAL_CALLBACK_DATA, DECLINE_REVEAL_CALLBACK_DATA)
+from .chat_functions import set_up_random_chat, accept_request, decline_request, cancel_chat
 from .functions import register_user, check_for_name, set_gender, check_id, check_batch, add_poll, about, commands, \
     accept_reveal_request, reveal, decline_reveal_request
-from .chat_functions import set_up_random_chat, accept_request, decline_request, cancel_chat
-from data import active_chats
-from database.db import Db
 
 message_id = ''
 
