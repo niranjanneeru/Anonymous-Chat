@@ -51,6 +51,6 @@
     'type': 'regular',
     'allows_multiple_answers': True,
     'explanation_entities': [],
-    'close_date': None
+    "close_date": None
   }
 }
