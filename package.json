@@ -1,0 +1,56 @@
+{
+  "update_id": 482366814,
+  "poll": {
+    "id": '6111854426324992004',
+    "question": 'Fill in your Interest (Choose Any Three)',
+    'options': [
+      {
+        'text': "80's Music",
+        'voter_count': 1
+      },
+      {
+        'text': 'Anime',
+        'voter_count': 0
+      },
+      {
+        'text': ' Film',
+        'voter_count': 0
+      },
+      {
+        'text': 'Cricket',
+        'voter_count': 0
+      },
+      {
+        'text': 'Football',
+        'voter_count': 0
+      },
+      {
+        'text': 'TV Series',
+        'voter_count': 0
+      },
+      {
+        'text': 'Networking',
+        'voter_count': 0
+      },
+      {
+        'text': 'Coding',
+        'voter_count': 0
+      },
+      {
+        'text': 'Gaming',
+        'voter_count': 0
+      },
+      {
+        'text': 'Humour',
+        'voter_count': 0
+      }
+    ],
+    'total_voter_count': 1,
+    'is_closed': False,
+    'is_anonymous': True,
+    'type': 'regular',
+    'allows_multiple_answers': True,
+    'explanation_entities': [],
+    'close_date': None
+  }
+}
