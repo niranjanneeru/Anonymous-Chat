@@ -1,11 +1,22 @@
-# custom msges
+# custom messages
 WELCOME_TEXT = "``` Hi, Welcome, to Pigeon Anonymous Chat Choose an option. ```"
 ASK_FOR_NAME = "``` What's your name (Won't be revealed until you want so) ```"
 CHAT_TEXT = "``` Chat Settings ```"
-INTEREST_LIST = ["80's Music", "Anime", " Film", "Cricket", "Football", "TV Series", "Networking", "Coding", "Gaming",
+INTEREST_LIST = ["80's Music", "Anime", "Film", "Cricket", "Football", "TV Series", "Networking", "Coding", "Gaming",
                  "Humour"]
+OPTION_LIST = ["Yes", "No", "Skip"]
+
+COMMANDS = """``` /start - initiate bot / chat settings
+ /help - chat settings / guide
+ /chat - chat settings
+```"""
 
 # creds
+ADMIN_ID = 805048446
+
+QUESTIONNAIRE_SET = "QUESTIONNAIRE_SET"
+QUESTIONNAIRE_SENT = "QUESTIONNAIRE_SENT"
+
 REGISTRATION_CALLBACK_DATA = "REGISTRATION_CALLBACK_DATA"
 PRIVATE_POLICY_CALLBACK_DATA = "PRIVATE_POLICY_CALLBACK_DATA"
 ABOUT_US_CALLBACK_DATA = "ABOUT_US_CALLBACK_DATA"
@@ -25,7 +36,9 @@ REPORT_CHAT = "UID_REPORT_CHAT"
 CLOSE_CHAT = "UID_CLOSE_CHAT_PORTAL"
 ACCEPT_REVEAL_CALLBACK_DATA = "UID_ACCEPT_REVEAL"
 DECLINE_REVEAL_CALLBACK_DATA = "UID_DECLINE_REVEAL"
-COMMANDS = """``` /start - initiate bot / chat settings
- /help - chat settings / guide
- /chat - chat settings
-```"""
+QUESTIONNAIRE = "QUESTIONNAIRE"
+ACCEPT_REPORT_CALLBACK_DATA = "ACCEPT_REPORT_CALLBACK_DATA"
+DECLINE_REPORT_CALLBACK_DATA = "DECLINE_REPORT_CALLBACK_DATA"
+CANCEL_REQUEST_CALLBACK_DATA = "CANCEL_REQUEST_CALLBACK_DATA"
+MENU = "MENU"
+VIEW_QUES = "VIEW_QUES_UID"

@@ -4,6 +4,9 @@ current_list_users = {}
 active_requests = {}
 active_chats = {}
 active_commands = {}
+black_list = []
+asked_questionnaire = {}
+active_polls = {}
 
 
 def delete_msg(chat_id, context):

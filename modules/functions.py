@@ -1,57 +1,111 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode, Update
 from telegram.ext import CallbackContext
 
-from data import current_list_users, active_chats, active_commands, delete_msg
+from data import current_list_users, active_chats, active_commands, delete_msg, black_list, active_requests
 from database.db import Db
 from models.user import User
 from utils import (WELCOME_TEXT, REGISTRATION_CALLBACK_DATA, PRIVATE_POLICY_CALLBACK_DATA,
                    ABOUT_US_CALLBACK_DATA, ASK_FOR_NAME, MALE_CALLBACK_DATA, FEMALE_CALLBACK_DATA,
                    NEUTRAL_CALLBACK_DATA, RESET_CALLBACK_DATA, RANDOM_CHAT_CALLBACK_DATA, COMMAND_CALLBACK_DATA,
                    INTEREST_LIST, WALKABOUT_CALLBACK_DATA, COMMANDS, ACCEPT_REVEAL_CALLBACK_DATA,
-                   DECLINE_REVEAL_CALLBACK_DATA,
-                   CLOSE_CHAT, REPORT_CHAT, REVEAL_IDENTITY_REQUEST)
+                   DECLINE_REVEAL_CALLBACK_DATA, QUESTIONNAIRE, QUESTIONNAIRE_SENT, CANCEL_REQUEST_CALLBACK_DATA,
+                   CLOSE_CHAT, REPORT_CHAT, REVEAL_IDENTITY_REQUEST, ACCEPT_CALLBACK_DATA, DECLINE_CALLBACK_DATA)
 
 
-def welcome(update: Update, context: CallbackContext) -> None:
+def status_code(chat_id: int):
+    if active_chats.get(chat_id, None):
+        return 1
+    elif active_requests.get(chat_id, None):
+        return 0
+    elif Db.get_instance().read_user_id(chat_id):
+        return -1
+
+
+def status(update: Update, context: CallbackContext) -> None:
+    chat_id = update.message.chat_id
+    code = status_code(chat_id)
+    if code == 1:
+        delete_msg(chat_id, context)
+        active_commands[chat_id] = context.bot.send_message(chat_id,
+                                                            """``` You are in a chat with an anonymous person```""",
+                                                            parse_mode=ParseMode.MARKDOWN).message_id
+    elif code == 0:
+        delete_msg(chat_id, context)
+        data = active_requests.get(chat_id, None)
+        if data[1] == 1:
+            keyboard = [[InlineKeyboardButton("CANCEL REQUEST", callback_data=CANCEL_REQUEST_CALLBACK_DATA)]]
+            msg_id = context.bot.send_message(chat_id,
+                                              """``` You are in request phase Waiting for Accepting```""",
+                                              parse_mode=ParseMode.MARKDOWN,
+                                              reply_markup=InlineKeyboardMarkup(keyboard)).message_id
+            active_commands[chat_id] = msg_id
+        elif data[1] == -1:
+            keyboard = [[InlineKeyboardButton("ACCEPT", callback_data=ACCEPT_CALLBACK_DATA),
+                         InlineKeyboardButton("DECLINE", callback_data=DECLINE_CALLBACK_DATA), ], ]
+            msg_id = context.bot.send_message(chat_id,
+                                              """``` You are in request phase```""",
+                                              parse_mode=ParseMode.MARKDOWN,
+                                              reply_markup=InlineKeyboardMarkup(keyboard)).message_id
+            active_commands[chat_id] = msg_id
+
+    elif code == -1:
+        delete_msg(chat_id, context)
+        active_commands[chat_id] = context.bot.send_message(chat_id,
+                                                            """``` You are all set to go Anonymous```""",
+                                                            parse_mode=ParseMode.MARKDOWN).message_id
+
+
+def welcome(chat_id: int, context: CallbackContext) -> None:
     menu = [[InlineKeyboardButton("Let's Start By Knowing Each Other", callback_data=REGISTRATION_CALLBACK_DATA), ],
-            [InlineKeyboardButton("Private Policy", callback_data=PRIVATE_POLICY_CALLBACK_DATA),
+            [InlineKeyboardButton("Privacy Policy", callback_data=PRIVATE_POLICY_CALLBACK_DATA),
              InlineKeyboardButton("About Us", callback_data=ABOUT_US_CALLBACK_DATA)]]
-    delete_msg(update.message.chat.id, context)
-    msg = context.bot.send_message(text=WELCOME_TEXT, parse_mode=ParseMode.MARKDOWN,
-                                   chat_id=update.message.chat.id,
-                                   reply_markup=InlineKeyboardMarkup(menu))
-    active_commands[update.message.chat.id] = msg.message_id
+    delete_msg(chat_id, context)
+    active_commands[chat_id] = context.bot.send_message(text=WELCOME_TEXT + "\n/skip ```:- To Skip Details part```",
+                                                        parse_mode=ParseMode.MARKDOWN,
+                                                        chat_id=chat_id,
+                                                        reply_markup=InlineKeyboardMarkup(menu)).message_id
+
+
+def helper(chat_id, context):
+    if chat_id in black_list:
+        return
+    if active_chats.get(chat_id, None):
+        if Db.get_instance().get_questions(chat_id):
+            menu = [[InlineKeyboardButton("Reveal Identity Request", callback_data=REVEAL_IDENTITY_REQUEST), ],
+                    [InlineKeyboardButton("Send Questionnaire", callback_data=QUESTIONNAIRE_SENT), ],
+                    [InlineKeyboardButton("Report Chat", callback_data=REPORT_CHAT),
+                     InlineKeyboardButton("View/ Edit Questionnaire", callback_data=QUESTIONNAIRE)],
+                    [InlineKeyboardButton("Close Chat Portal", callback_data=CLOSE_CHAT), ]]
+        else:
+            menu = [[InlineKeyboardButton("Reveal Identity Request", callback_data=REVEAL_IDENTITY_REQUEST), ],
+                    [InlineKeyboardButton("Report Chat", callback_data=REPORT_CHAT),
+                     InlineKeyboardButton("View/ Edit Questionnaire", callback_data=QUESTIONNAIRE)],
+                    [InlineKeyboardButton("Close Chat Portal", callback_data=CLOSE_CHAT), ]]
+        delete_msg(chat_id, context)
+        active_commands[chat_id] = context.bot.send_message(text=WELCOME_TEXT,
+                                                            parse_mode=ParseMode.MARKDOWN,
+                                                            chat_id=chat_id,
+                                                            reply_markup=InlineKeyboardMarkup(
+                                                                menu)).message_id
+    elif Db.get_instance().read_user_id(chat_id):
+        menu = [[InlineKeyboardButton("Random Chat", callback_data=RANDOM_CHAT_CALLBACK_DATA), ],
+                [InlineKeyboardButton("Questionnaire", callback_data=QUESTIONNAIRE), ],
+                [InlineKeyboardButton("Alter Interest", callback_data=RESET_CALLBACK_DATA), ],
+                [InlineKeyboardButton("How This Works", callback_data=WALKABOUT_CALLBACK_DATA),
+                 InlineKeyboardButton("Commands", callback_data=COMMAND_CALLBACK_DATA)]]
+
+        delete_msg(chat_id, context)
+        active_commands[chat_id] = context.bot.send_message(text=WELCOME_TEXT,
+                                                            parse_mode=ParseMode.MARKDOWN,
+                                                            chat_id=chat_id,
+                                                            reply_markup=InlineKeyboardMarkup(
+                                                                menu)).message_id
+    else:
+        welcome(chat_id, context)
 
 
 def help_menu(update: Update, context: CallbackContext) -> None:
-    if active_chats.get(update.message.chat.id, None):
-        menu = [[InlineKeyboardButton("Reveal Identity Request", callback_data=REVEAL_IDENTITY_REQUEST), ],
-                [InlineKeyboardButton("Report Chat", callback_data=REPORT_CHAT), ],
-                [InlineKeyboardButton("Close Chat Portal", callback_data=CLOSE_CHAT), ],
-                [InlineKeyboardButton("Private Policy", callback_data=PRIVATE_POLICY_CALLBACK_DATA),
-                 InlineKeyboardButton("About Us", callback_data=ABOUT_US_CALLBACK_DATA)]]
-        delete_msg(update.message.chat.id, context)
-        active_commands[update.message.chat.id] = context.bot.send_message(text=WELCOME_TEXT,
-                                                                           parse_mode=ParseMode.MARKDOWN,
-                                                                           chat_id=update.message.chat.id,
-                                                                           reply_markup=InlineKeyboardMarkup(
-                                                                               menu)).message_id
-    elif Db.get_instance().read_user_id(update.message.chat.id):
-        menu = [[InlineKeyboardButton("Random Chat", callback_data=RANDOM_CHAT_CALLBACK_DATA), ],
-                [InlineKeyboardButton("Questionnaire", callback_data=RESET_CALLBACK_DATA), ],
-                [InlineKeyboardButton("How This Works", callback_data=WALKABOUT_CALLBACK_DATA),
-                 InlineKeyboardButton("Commands", callback_data=COMMAND_CALLBACK_DATA)],
-                [InlineKeyboardButton("Private Policy", callback_data=PRIVATE_POLICY_CALLBACK_DATA),
-                 InlineKeyboardButton("About Us", callback_data=ABOUT_US_CALLBACK_DATA)]]
-
-        delete_msg(update.message.chat.id, context)
-        active_commands[update.message.chat.id] = context.bot.send_message(text=WELCOME_TEXT,
-                                                                           parse_mode=ParseMode.MARKDOWN,
-                                                                           chat_id=update.message.chat.id,
-                                                                           reply_markup=InlineKeyboardMarkup(
-                                                                               menu)).message_id
-    else:
-        welcome(update, context)
+    helper(update.message.chat.id, context)
 
 
 def register_user(update: Update, context: CallbackContext):
@@ -110,7 +164,7 @@ def check_id(update: Update, context: CallbackContext) -> bool:
         user.set_id(update.message.text)
         user.askedId = False
         delete_msg(update.message.chat.id, context)
-        active_commands[update.message.chat.id] = context.bot.send_message(text='``` Which Batch? ```',
+        active_commands[update.message.chat.id] = context.bot.send_message(text='``` Which Year? ```',
                                                                            parse_mode=ParseMode.MARKDOWN,
                                                                            chat_id=update.message.chat.id, ).message_id
         return True
@@ -121,13 +175,13 @@ def check_batch(update: Update, context: CallbackContext) -> bool:
     user: User = current_list_users.get(update.message.chat.id, None)
     if user and user.askedBatch:
         user.set_batch(update.message.text)
-        user.askedBatch = True
+        user.askedBatch = False
         delete_msg(update.message.chat.id, context)
         context.bot.send_message(text=f'``` Inserted Data\n'
                                       f'Name {user.name}\n'
                                       f'Instagram {user.instagram_id}\n'
                                       f'Gender {user.GENDER[user.gender]}\n'
-                                      f'Batch {user.batch}```',
+                                      f'Year {user.batch}```',
                                  parse_mode=ParseMode.MARKDOWN,
                                  chat_id=update.message.chat.id, )
         Db.get_instance().write_user(user)
@@ -153,11 +207,29 @@ def add_poll(update: Update, context: CallbackContext) -> None:
             if flag == 3:
                 break
         user.askedSkill = False
-        delete_msg(user_id, context)
-        active_commands[user_id] = context.bot.send_message(text=f'``` Selected Interest:- {",".join(msg)} ```',
-                                                            parse_mode=ParseMode.MARKDOWN,
-                                                            chat_id=user_id, ).message_id
+        context.bot.send_message(text=f'``` Selected Interest:- {",".join(msg)} ```',
+                                 parse_mode=ParseMode.MARKDOWN,
+                                 chat_id=user_id, )
         del current_list_users[user_id]
+        context.bot.send_message(text=f'``` You are all set to go Anonymous ```',
+                                 parse_mode=ParseMode.MARKDOWN,
+                                 chat_id=user_id, )
+        helper(user_id, context)
+        return True
+    return False
+
+
+def send_poll(update: Update, context: CallbackContext) -> None:
+    delete_msg(update.callback_query.message.chat.id, context)
+    user = Db.get_instance().read_user_id(update.callback_query.message.chat.id)
+    user.askedSkill = True
+    current_list_users[user.tel_id] = user
+    Db.get_instance().delete_interest(user.tel_id)
+    active_commands[update.callback_query.message.chat.id] = context.bot.send_poll(
+        update.callback_query.message.chat.id,
+        "Fill in your Interest (Choose Any Three)",
+        INTEREST_LIST, allows_multiple_answers=True,
+        is_anonymous=False).message_id
 
 
 def about(update: Update, context: CallbackContext) -> None:
@@ -193,12 +265,12 @@ def accept_reveal_request(update: Update, context: CallbackContext) -> None:
     delete_msg(user_id, context)
     data = Db.get_instance().read_user_id(user_id)
     if data:
-        msg = f"``` Name:- {data.name}\n Instagram Id:- {data.instagram_id}\n Gender:- {data.GENDER[data.gender]}\n Batch:- {data.batch}```"
+        msg = f"``` Name:- {data.name}\n Instagram Id:- {data.instagram_id}\n Gender:- {data.GENDER[data.gender]}\n Year:- {data.batch}```"
         context.bot.send_message(text=msg, parse_mode=ParseMode.MARKDOWN,
                                  chat_id=active_chats[user_id])
     data = Db.get_instance().read_user_id(active_chats[user_id])
     if data:
-        msg = f"``` Name:- {data.name}\n Instagram Id:- {data.instagram_id}\n Gender:- {data.GENDER[data.gender]}\n Batch:- {data.batch}```"
+        msg = f"``` Name:- {data.name}\n Instagram Id:- {data.instagram_id}\n Gender:- {data.GENDER[data.gender]}\n Year:- {data.batch}```"
         context.bot.send_message(text=msg, parse_mode=ParseMode.MARKDOWN,
                                  chat_id=user_id)
 
@@ -213,3 +285,16 @@ def decline_reveal_request(update: Update, context: CallbackContext) -> None:
     active_commands[user_id] = context.bot.send_message(text="``` Reveal Request Declined```",
                                                         parse_mode=ParseMode.MARKDOWN,
                                                         chat_id=user_id).message_id
+
+
+def skip(update: Update, context: CallbackContext):
+    chat_id = update.message.chat_id
+    if not Db.get_instance().read_user_id(chat_id):
+        if current_list_users.get(chat_id, None):
+            user = current_list_users[chat_id]
+            Db.get_instance().write_user(user)
+            del current_list_users[chat_id]
+        else:
+            user = User(chat_id)
+            Db.get_instance().write_user(user)
+    helper(chat_id, context)

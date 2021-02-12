@@ -1,56 +1,48 @@
 {
-  "update_id": 482366814,
-  "poll": {
-    "id": '6111854426324992004',
-    "question": 'Fill in your Interest (Choose Any Three)',
-    'options': [
-      {
-        'text': "80's Music",
-        'voter_count': 1
+  'update_id': 482367656,
+  'message': {
+    'message_id': 2597,
+    'date': 1612435968,
+    'chat': {
+      'id': 946903536,
+      'type': 'private',
+      'username': 'neeruniranjan',
+      'first_name': 'Niranjan',
+      'last_name': 'Neeru'
+    },
+    'entities': [],
+    'caption_entities': [],
+    'photo': [],
+    'sticker': {
+      'file_id': 'CAACAgIAAxkBAAIKJWAb0gABcb_h-DEf2E6qPbONrAZaVgACEQADwDZPEw2qsw_cHj7lHgQ',
+      'file_unique_id': 'AgADEQADwDZPEw',
+      'width': 512,
+      'height': 512,
+      'is_animated': True,
+      'thumb': {
+        'file_id': 'AAMCAgADGQEAAgolYBvSAAFxv-H4MR_YTqo9s42sBlpWAAIRAAPANk8TDaqzD9wePuXUH7gPAAQBAAdtAAOwcQACHgQ',
+        'file_unique_id': 'AQAD1B-4DwAEsHEAAg',
+        'width': 128,
+        'height': 128,
+        'file_size': 4200
       },
-      {
-        'text': 'Anime',
-        'voter_count': 0
-      },
-      {
-        'text': ' Film',
-        'voter_count': 0
-      },
-      {
-        'text': 'Cricket',
-        'voter_count': 0
-      },
-      {
-        'text': 'Football',
-        'voter_count': 0
-      },
-      {
-        'text': 'TV Series',
-        'voter_count': 0
-      },
-      {
-        'text': 'Networking',
-        'voter_count': 0
-      },
-      {
-        'text': 'Coding',
-        'voter_count': 0
-      },
-      {
-        'text': 'Gaming',
-        'voter_count': 0
-      },
-      {
-        'text': 'Humour',
-        'voter_count': 0
-      }
-    ],
-    'total_voter_count': 1,
-    'is_closed': False,
-    'is_anonymous': True,
-    'type': 'regular',
-    'allows_multiple_answers': True,
-    'explanation_entities': [],
-    "close_date": None
+      'emoji': '🤤',
+      'file_size': 15728,
+      'set_name': 'HotCherry'
+    },
+    'new_chat_members': [],
+    'new_chat_photo': [],
+    'delete_chat_photo': False,
+    'group_chat_created': False,
+    'supergroup_chat_created': False,
+    'channel_chat_created': False,
+    'from': {
+      'id': 946903536,
+      'first_name': 'Niranjan',
+      'is_bot': False,
+      'last_name': 'Neeru',
+      'username': 'neeruniranjan',
+      'language_code': 'en'
+    }
   }
 }
