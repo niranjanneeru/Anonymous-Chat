@@ -1,15 +1,18 @@
 from telegram import Update
 from telegram.ext import CallbackContext
-from database.db import Db
-from data import serialize, active_chats, current_list_users, active_commands, active_requests
+
+from data import serialize, active_chats, active_commands, active_requests
 from utils import (ADMIN_ID)
 
 
 def store(update: Update, context: CallbackContext) -> None:
     if update.message.chat.id == ADMIN_ID:
         update.message.reply_text("Successfully")
-        Db.get_instance().update_commands()
-        print(active_chats)
+        serialize()
         print(active_requests)
+        print(active_chats)
         print(active_commands)
-        print(current_list_users)
+
+
+def chat_id(update: Update, context: CallbackContext):
+    update.message.reply_text(f"Id:- {update.message.chat_id}")

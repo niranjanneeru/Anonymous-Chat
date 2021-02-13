@@ -8,11 +8,11 @@ from utils import (REGISTRATION_CALLBACK_DATA, MALE_CALLBACK_DATA, FEMALE_CALLBA
                    DECLINE_CALLBACK_DATA, CLOSE_CHAT, REVEAL_IDENTITY_REQUEST, REPORT_CHAT, QUESTIONNAIRE,
                    ACCEPT_REVEAL_CALLBACK_DATA, DECLINE_REVEAL_CALLBACK_DATA, ACCEPT_REPORT_CALLBACK_DATA,
                    DECLINE_REPORT_CALLBACK_DATA, MENU, QUESTIONNAIRE_SET, VIEW_QUES, QUESTIONNAIRE_SENT,
-                   CANCEL_REQUEST_CALLBACK_DATA)
+                   CANCEL_REQUEST_CALLBACK_DATA, SKIP_REG_CALLBACK_DATA)
 from .chat_functions import (set_up_random_chat, accept_request, decline_request, cancel_chat, report_chat,
                              report_confirmation, cancel_request)
 from .functions import (register_user, check_for_name, set_gender, check_id, check_batch, add_poll, about, commands,
-                        accept_reveal_request, reveal, decline_reveal_request, send_poll, helper)
+                        accept_reveal_request, reveal, decline_reveal_request, send_poll, helper, skip_process)
 from .questionnaire import (questionnaire, parse_questions, edit_questionnaire, view_questionnaire, send_questionnaire,
                             handle_answers)
 
@@ -64,7 +64,9 @@ def callback_query_handler(update: Update, context: CallbackContext) -> None:
     elif update.callback_query.data == QUESTIONNAIRE_SENT:
         send_questionnaire(update, context)
     elif update.callback_query.data == CANCEL_REQUEST_CALLBACK_DATA:
-        cancel_request(update, context)
+        cancel_request(update.callback_query.message, context)
+    elif update.callback_query.data == SKIP_REG_CALLBACK_DATA:
+        skip_process(update.callback_query.message, context)
 
 
 def message_handler(update: Update, context: CallbackContext) -> None:
@@ -80,12 +82,8 @@ def message_handler(update: Update, context: CallbackContext) -> None:
         parse_questions(update, context)
         return
     if active_chats.get(update.message.chat.id, None):
-        if update.message.text.find('@'):
-            context.bot.send_message(text=update.message.text,
-                                     chat_id=active_chats[update.message.chat.id])
-        else:
-            context.bot.send_message(text=update.message.text, parse_mode=ParseMode.MARKDOWN,
-                                     chat_id=active_chats[update.message.chat.id])
+        context.bot.send_message(text=update.message.text,
+                                 chat_id=active_chats[update.message.chat.id])
 
 
 def sticker_handler(update: Update, context: CallbackContext):

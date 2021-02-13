@@ -59,14 +59,14 @@ class Db:
         return Db.__db
 
     def add_questions(self, chat_id, questions):
-        self.c.execute("""INSERT INTO questionnaire (id,questions) values (?,?)""", (chat_id, "|".join(questions)))
+        self.c.execute("""INSERT INTO questionnaire (id,questions) values (?,?)""", (chat_id, "/".join(questions)))
         self.connection.commit()
 
     def get_questions(self, chat_id) -> list:
         self.c.execute("""SELECT questions FROM questionnaire WHERE id = ?""", (chat_id,))
         data = self.c.fetchone()
         if data:
-            return data[0].split("|")
+            return data[0].split("/")
         return data
 
     def delete_questions(self, chat_id):
@@ -147,6 +147,10 @@ class Db:
              user.connected,
              user.block))
 
+        self.connection.commit()
+
+    def delete_user(self, user_id):
+        self.c.execute("""DELETE FROM users WHERE id = ?""", (user_id,))
         self.connection.commit()
 
     def update_user_connected(self, tel_id: int):

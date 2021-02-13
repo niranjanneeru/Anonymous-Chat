@@ -3,7 +3,7 @@ from random import sample
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode, Update
 from telegram.ext import CallbackContext
 
-from .functions import status_code
+from .functions import status_code, helper
 from data import active_chats, active_requests, active_commands, delete_msg
 from database.db import Db
 from models.request import Request
@@ -20,14 +20,26 @@ def set_up_random_chat(update: Update, context: CallbackContext) -> None:
                                  chat_id=update.callback_query.message.chat.id, )
         return
     if data == 0:
-        keyboard = [[InlineKeyboardButton("ACCEPT", callback_data=ACCEPT_CALLBACK_DATA),
-                     InlineKeyboardButton("DECLINE", callback_data=DECLINE_CALLBACK_DATA), ], ]
-
-        context.bot.send_message(text=f'``` You are in request phase ```',
-                                 parse_mode=ParseMode.MARKDOWN,
-                                 chat_id=update.callback_query.message.chat.id,
-                                 reply_markup=InlineKeyboardMarkup(keyboard))
+        data = active_requests.get(update.callback_query.message.chat.id, None)
+        delete_msg(update.callback_query.message.chat_id, context)
+        print(data)
+        if data[1] == 1:
+            keyboard = [[InlineKeyboardButton("CANCEL REQUEST", callback_data=CANCEL_REQUEST_CALLBACK_DATA)]]
+            msg_id = context.bot.send_message(update.callback_query.message.chat.id,
+                                              """``` You are in request phase Waiting for Accepting```""",
+                                              parse_mode=ParseMode.MARKDOWN,
+                                              reply_markup=InlineKeyboardMarkup(keyboard)).message_id
+            active_commands[update.callback_query.message.chat.id] = msg_id
+        elif data[1] == -1:
+            keyboard = [[InlineKeyboardButton("ACCEPT", callback_data=ACCEPT_CALLBACK_DATA),
+                         InlineKeyboardButton("DECLINE", callback_data=DECLINE_CALLBACK_DATA), ], ]
+            msg_id = context.bot.send_message(update.callback_query.message.chat.id,
+                                              """``` You are in request phase```""",
+                                              parse_mode=ParseMode.MARKDOWN,
+                                              reply_markup=InlineKeyboardMarkup(keyboard)).message_id
+            active_commands[update.callback_query.message.chat.id] = msg_id
         return
+
     data = Db.get_instance().read_available_users(update.callback_query.message.chat.id)
     if len(data) == 0:
         context.bot.send_message(text=f'``` Oops! No Users Available try after some time ```',
@@ -106,8 +118,8 @@ def accept_request(update: Update, context: CallbackContext):
             chat_id=tel_to).message_id
 
 
-def cancel_request(update: Update, context: CallbackContext):
-    tel_id = update.callback_query.message.chat.id
+def cancel_request(message, context: CallbackContext):
+    tel_id = message.chat.id
     tel_to = active_requests.get(tel_id, None)
     if tel_to:
         tel_to = tel_to[0]
@@ -177,6 +189,12 @@ def cancel_chat(update: Update, context: CallbackContext):
         active_commands[active_chats[tel_id]] = context.bot.send_message(text=f'``` Chat Cancelled ```',
                                                                          parse_mode=ParseMode.MARKDOWN,
                                                                          chat_id=active_chats[tel_id]).message_id
+        context.bot.send_message(text="/chat for chat settings",
+                                 parse_mode=ParseMode.MARKDOWN,
+                                 chat_id=active_chats[tel_id])
+        context.bot.send_message(text="/chat for chat settings",
+                                 parse_mode=ParseMode.MARKDOWN,
+                                 chat_id=tel_id)
         del active_chats[active_chats[tel_id]]
         del active_chats[tel_id]
 
