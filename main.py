@@ -13,7 +13,8 @@ from modules.handlers import (callback_query_handler, message_handler, poll_hand
 from modules.questionnaire import cancel
 
 if __name__ == '__main__':
-    updater = Updater('1429135380:AAGeHjnn8aoWK-nr3NZon3UT4RFE12PkhXw', use_context=True,
+    # TOKEN  = HERE
+    updater = Updater(TOKEN, use_context=True,
                       request_kwargs={'read_timeout': 6, 'connect_timeout': 7})
     dp = updater.dispatcher
 
